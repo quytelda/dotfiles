@@ -1,0 +1,15 @@
+[core]
+editor = emacs -nw
+
+[user]
+email = quytelda@tamalin.org
+name = Quytelda Kahja
+
+[init]
+defaultBranch = main
+
+[push]
+default = simple
+
+[pull]
+rebase = false
