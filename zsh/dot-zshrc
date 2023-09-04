@@ -1,0 +1,86 @@
+# TMUX
+
+## Try to get the ID of an unattached tmux session.
+function tmux_find_session() {
+    tmux ls -F '#{?session_attached,,#S}' 2>/dev/null \
+	| grep -v -m 1 '^$'
+}
+
+## Start tmux on every interactive shell login,
+## if available and the terminal supports it.
+if [[ $- == *i* ]]                    \
+       && [[ "$TERM" != "dumb" ]]     \
+       && [[ -z "$TMUX" ]]            \
+       && command -v tmux &>/dev/null; then
+    # If an unattached session exists, attach to it.
+    # Otherwise, create a new one.
+    session_id=$(tmux_find_session)
+    if [[ $session_id ]]; then
+	exec tmux attach-session -t "${session_id}"
+    else
+	exec tmux new-session
+    fi
+fi
+
+# ALIASES
+alias diff='diff --color=auto --unified'
+alias ls='ls --color=auto'
+
+# ENVIRONMENT VARIABLES
+
+## Enable Docker Content Trust
+export DOCKER_CONTENT_TRUST=1
+
+## Use Emacs as the default editor.
+export EDITOR="emacs"
+
+# KEY BINDINGS
+bindkey -e
+
+## Alt+Left and Alt+Right move one word left or right.
+bindkey '^[[1;3D' backward-word
+bindkey '^[[1;3C' forward-word
+
+## Use bash-style word boundaries.
+autoload -U select-word-style
+select-word-style bash
+
+## Ctrl+X, Ctrl+E opens the current command in a text editor.
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^X^E' edit-command-line
+
+# COMPLETION
+zstyle :compinstall filename "$HOME/.zshrc"
+autoload -Uz compinit
+compinit
+
+## Enable completion of command line switches for aliases.
+setopt COMPLETE_ALIASES
+
+## HISTORY
+HISTFILE=~/.zsh_history
+HISTSIZE=1000
+SAVEHIST=1000
+
+## Don't record certain commands in the ZSH history.
+zshaddhistory() {
+    local line="${1%%$'\n'}"
+
+    case "${line}" in
+	ls) return 1;;
+    esac
+
+    case "${line%% *}" in
+	clear) return 1;;
+	exit)  return 1;;
+	man)   return 2;;
+    esac
+
+    return 0;
+}
+
+# PROMPT
+autoload -Uz promptinit
+promptinit
+prompt redhat
