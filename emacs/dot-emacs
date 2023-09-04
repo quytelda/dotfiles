@@ -1,0 +1,122 @@
+;; Text Wrap
+(add-hook 'text-mode-hook 'visual-line-mode)
+(add-hook 'text-mode-hook 'auto-fill-mode)
+(setq sentence-end-double-space nil)
+
+;; Line & Column Numbers
+(global-display-line-numbers-mode t)
+(setq column-number-mode t)
+
+;; Highlight the current line.
+(global-hl-line-mode +1)
+
+;; Annotations
+(defun highlight-annotations ()
+  (font-lock-add-keywords nil '(("\\<\\(FIXME\\|TODO\\|BUG\\|XXX\\):"
+				 1 'font-lock-warning-face prepend))))
+(add-hook 'prog-mode-hook 'highlight-annotations)
+
+;; Backup & Auto-Save Files
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+
+;; Enabled & Disabled Commands
+(put 'downcase-region           'disabled nil)
+(put 'upcase-region             'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Location History
+(global-set-key (kbd "C-c p") 'point-to-register)
+(global-set-key (kbd "C-c j") 'jump-to-register)
+
+;; Convenience Bindings
+(global-set-key (kbd "C-c a") 'align)
+(global-set-key (kbd "C-c e") 'align-regexp)
+(global-set-key (kbd "C-c r") 'replace-string)
+(global-set-key (kbd "C-c w") 'delete-trailing-whitespace)
+(global-set-key (kbd "C-c R") 'revert-buffer)
+
+;; C/C++ Style
+(setq c-default-style '((java-mode . "java")
+			(awk-mode . "awk")
+			(c++-mode . "stroustrup")
+			(other . "linux")))
+
+;; Use spaces instead of tabs in C++ files.
+(add-hook 'c++-mode-hook
+	  (lambda () (setq indent-tabs-mode nil)))
+
+;; Tables
+(global-set-key (kbd "C-c t R") 'table-recognize)
+(global-set-key (kbd "C-c t r") 'table-recognize-region)
+
+;; Code Folding
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+
+;; File Associations
+(add-to-list 'auto-mode-alist '("\\.\\(service\\|timer\\)\\'" . conf-unix-mode))
+
+;; Packages
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize)
+
+;; Dockerfiles and Containerfiles
+;; Use shell-script-mode for Dockerfiles & Containerfiles.
+(add-to-list 'auto-mode-alist '("Dockerfile" . shell-script-mode))
+(add-to-list 'auto-mode-alist '("Containerfile" . shell-script-mode))
+
+;; ZSH edit-command-line
+(add-to-list 'auto-mode-alist '("^/tmp/zsh[[:alnum:]]*\\'" . shell-script-mode))
+
+;; haskell-mode
+(when (require 'haskell-mode nil t)
+  (define-key haskell-mode-map (kbd "C-c h i") 'haskell-navigate-imports)
+  (define-key haskell-mode-map (kbd "C-c h ,") 'haskell-mode-format-imports)
+  (define-key haskell-mode-map (kbd "C-c h f") 'haskell-mode-stylish-buffer)
+  (add-hook 'align-load-hook
+	    (lambda ()
+	      (add-to-list 'align-rules-list
+			   '(haskell-types
+			     (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")
+			     (modes quote (haskell-mode literate-haskell-mode))))
+	      (add-to-list 'align-rules-list
+			   '(haskell-assignment
+			     (regexp . "\\(\\s-+\\)=\\s-+")
+			     (modes quote (haskell-mode literate-haskell-mode))))
+	      (add-to-list 'align-rules-list
+			   '(haskell-arrows
+			     (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
+			     (modes quote (haskell-mode literate-haskell-mode))))
+	      (add-to-list 'align-rules-list
+			   '(haskell-left-arrows
+			     (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
+			     (modes quote (haskell-mode literate-haskell-mode)))))))
+
+;; rust-mode
+(when (require 'rust-mode nil t)
+  (add-hook 'rust-mode-hook
+	    (lambda () (setq indent-tabs-mode nil))))
+
+;; UI
+(setq inhibit-startup-message t)
+(if (display-graphic-p)
+    (progn
+      (tool-bar-mode   0)
+      (scroll-bar-mode 0))
+  (progn (menu-bar-mode 0)
+	 (set-face-background 'default "unspecified-bg")))
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(markdown-mode rust-mode yaml-mode haskell-mode)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
